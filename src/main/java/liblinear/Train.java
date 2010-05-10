@@ -253,7 +253,7 @@ public class Train {
         prob = Train.readProblem(new File(filename), bias);
     }
 
-    private static Problem constructProblem(List<Integer> vy, List<FeatureNode[]> vx, int max_index, double bias) {
+    public static Problem constructProblem(List<Integer> vy, List<FeatureNode[]> vx, int max_index, double bias) {
         Problem prob = new Problem();
         prob.bias = bias;
         prob.l = vy.size();
