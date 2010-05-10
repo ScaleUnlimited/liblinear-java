@@ -52,14 +52,6 @@
         this dependency needs to be installed manually (see the 'lib' folder)
         -->
         <dependency>
-            <groupId>org.netlib.jlapack</groupId>
-            <artifactId>blas</artifactId>
-            <version>0.8</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <!-- dependencies for unit testing -->
-        <dependency>
             <groupId>org.powermock.modules</groupId>
             <artifactId>powermock-module-junit4</artifactId>
             <version>${powermock.version}</version>
@@ -83,6 +75,13 @@
             <version>1.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+        	<groupId>org.netlib.jlapack</groupId>
+        	<artifactId>blas_simple</artifactId>
+        	<version>0.8</version>
+        </dependency>
+
+        <!-- dependencies for unit testing -->
     </dependencies>
     <reporting>
         <plugins>
