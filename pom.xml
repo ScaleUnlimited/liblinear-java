@@ -4,7 +4,7 @@
     <groupId>liblinear</groupId>
     <artifactId>liblinear</artifactId>
     <name>liblinear</name>
-    <version>1.51</version>
+    <version>1.51-bixolabs-1</version>
     <url>http://www.csie.ntu.edu.tw/~cjlin/liblinear/</url>
     <build>
         <plugins>
@@ -79,6 +79,12 @@
         	<groupId>org.netlib.jlapack</groupId>
         	<artifactId>blas_simple</artifactId>
         	<version>0.8</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.netlib.jlapack</groupId>
+        	<artifactId>blas</artifactId>
+        	<version>0.8</version>
+        	<scope>test</scope>
         </dependency>
 
         <!-- dependencies for unit testing -->
