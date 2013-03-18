@@ -1,64 +1,101 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>liblinear</groupId>
+    <groupId>de.bwaldvogel</groupId>
     <artifactId>liblinear</artifactId>
+    <packaging>jar</packaging>
     <name>liblinear</name>
-    <version>1.51-bixolabs-1</version>
-    <url>http://www.csie.ntu.edu.tw/~cjlin/liblinear/</url>
+    <version>1.92</version>
+    <description>Java port of Liblinear</description>
+    <url>http://www.bwaldvogel.de/liblinear-java/</url>
+
+    <licenses>
+        <license>
+            <name>The BSD License</name>
+            <url>http://www.opensource.org/licenses/bsd-license.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>6</version>
+    </parent>
+
+    <scm>
+        <connection>scm:git:git@github.com:bwaldvogel/liblinear-java.git</connection>
+        <developerConnection>scm:git:git@github.com:bwaldvogel/liblinear-java.git</developerConnection>
+        <url>git@github.com:bwaldvogel/liblinear-java.git</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>bwaldvogel</id>
+            <name>Benedikt Waldvogel</name>
+            <email>mail at bwaldvogel.de</email>
+        </developer>
+    </developers>
+
     <build>
+        <finalName>liblinear-${project.version}</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
+                    <source>1.6</source>
+                    <target>1.6</target>
                 </configuration>
             </plugin>
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <id>attach-sources</id>
                         <goals>
-                            <goal>assembly</goal>
+                            <goal>jar-no-fork</goal>
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
                 <configuration>
-                    <finalName>liblinear-${project.version}</finalName>
-                    <descriptors>
-                        <descriptor>assembly.xml</descriptor>
-                    </descriptors>
+                    <keyname>D2250F35</keyname>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-    <repositories>
-        <repository>
-            <id>powermock-repo</id>
-            <url>http://powermock.googlecode.com/svn/repo/</url>
-        </repository>
-        <repository>
-            <id>fest-assert</id>
-            <url>http://svn.codehaus.org/fest/m2/repo/</url>
-        </repository>
-    </repositories>
+
     <properties>
-        <powermock.version>1.2.5</powermock.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <powermock.version>1.4.8</powermock.version>
     </properties>
+
     <dependencies>
-        <!--
-        this dependency needs to be installed manually (see the 'lib' folder)
-        -->
+        <!-- dependencies for unit testing -->
         <dependency>
-            <groupId>org.powermock.modules</groupId>
+            <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
             <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.powermock.api</groupId>
+            <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
             <version>${powermock.version}</version>
             <scope>test</scope>
@@ -66,13 +103,13 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.5</version>
+            <version>4.8.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
-            <version>1.1</version>
+            <version>1.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
