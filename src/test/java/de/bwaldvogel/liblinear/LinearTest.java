@@ -6,6 +6,10 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
@@ -182,6 +186,27 @@ public class LinearTest {
             Linear.saveModel(tempFile, model);
 
             Model loadedModel = Linear.loadModel(tempFile);
+            assertThat(loadedModel).isEqualTo(model);
+        }
+    }
+
+    @Test
+    public void testLoadSaveModelUsingDataOutIn() throws Exception {
+
+        Model model = null;
+        for (SolverType solverType : SolverType.values()) {
+            model = createRandomModel();
+            model.solverType = solverType;
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(baos);
+            
+            Linear.saveModel(dos, model);
+
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            DataInputStream dis = new DataInputStream(bais);
+            
+            Model loadedModel = Linear.loadModel(dis);
             assertThat(loadedModel).isEqualTo(model);
         }
     }

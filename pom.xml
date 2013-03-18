@@ -4,7 +4,7 @@
     <artifactId>liblinear</artifactId>
     <packaging>jar</packaging>
     <name>liblinear</name>
-    <version>1.92</version>
+    <version>1.92-su-1</version>
     <description>Java port of Liblinear</description>
     <url>http://www.bwaldvogel.de/liblinear-java/</url>
 
@@ -23,9 +23,9 @@
     </parent>
 
     <scm>
-        <connection>scm:git:git@github.com:bwaldvogel/liblinear-java.git</connection>
-        <developerConnection>scm:git:git@github.com:bwaldvogel/liblinear-java.git</developerConnection>
-        <url>git@github.com:bwaldvogel/liblinear-java.git</url>
+        <connection>scm:git:git@github.com:ScaleUnlimited/liblinear-java.git</connection>
+        <developerConnection>scm:git:git@github.com:ScaleUnlimited/liblinear-java.git</developerConnection>
+        <url>git@github.com:ScaleUnlimited/liblinear-java.git</url>
     </scm>
 
     <developers>

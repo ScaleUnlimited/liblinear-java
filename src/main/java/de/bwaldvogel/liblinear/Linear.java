@@ -3,6 +3,8 @@ package de.bwaldvogel.liblinear;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -40,8 +42,54 @@ public class Linear {
     private static PrintStream DEBUG_OUTPUT        = System.out;
 
     private static final long  DEFAULT_RANDOM_SEED = 0L;
+    
+    private static final double EPSILON            = 0.00000001;
+    
     static Random              random              = new Random(DEFAULT_RANDOM_SEED);
 
+    private static class MyBitSet {
+        private long[] bits;
+
+        private static int arrayIndex(int bitIndex) {
+            // We store longs, so 64 bits/value, which is 2^6
+            return bitIndex >> 6;
+        }
+
+        public MyBitSet() {
+            bits = new long[0];
+        }
+        
+        public MyBitSet(int nbits) {
+            bits = new long[arrayIndex(nbits-1) + 1];
+        }
+
+        public void set(int bitIndex) {
+            int arrayIndex = arrayIndex(bitIndex);
+            bits[arrayIndex] |= (1L << bitIndex);
+        }
+
+        public boolean get(int bitIndex) {
+            int arrayIndex = arrayIndex(bitIndex);
+            return (bits[arrayIndex] & (1L << bitIndex)) != 0;
+        }
+        
+        public void write(DataOutput out) throws IOException {
+            out.writeInt(bits.length);
+            for (int i = 0; i < bits.length; i++) {
+                out.writeLong(bits[i]);
+            }
+        }
+        
+        public void read(DataInput in) throws IOException {
+            int numWords = in.readInt();
+            bits = new long[numWords];
+            
+            for (int i = 0; i < numWords; i++) {
+                bits[i] = in.readLong();
+            }
+        }
+    }
+    
     /**
      * @param target predicted classes
      */
@@ -291,6 +339,67 @@ public class Linear {
     }
 
     /**
+     * Loads the model from DataInput.
+     *
+     * <p>Note: DataInput is <b>NOT closed</b> after reading.</p>
+     */
+    public static Model loadModel(DataInput in) throws IOException {
+        Model model = new Model();
+
+        model.label = null;
+
+        model.solverType = SolverType.valueOf(in.readUTF());
+        if (model.solverType == null) {
+            throw new RuntimeException("unknown solver type");
+        }
+        
+        model.nr_class = in.readInt();
+        int numLabels = in.readInt();
+        if (numLabels != 0) {
+            if (numLabels != model.nr_class) {
+                throw new RuntimeException("num labels doesn't match expected count");
+            }
+            
+            model.label = new int[numLabels];
+            for (int i = 0; i < numLabels; i++) {
+                model.label[i] = in.readInt();
+            }
+        }
+        
+        model.nr_feature = in.readInt();
+        model.bias = in.readDouble();
+        
+        int w_size = model.nr_feature;
+        if (model.bias >= 0) {
+            w_size++;
+        }
+
+        int nr_w = model.nr_class;
+        if ((model.nr_class == 2) && (model.solverType != SolverType.MCSVM_CS)) {
+            nr_w = 1;
+        }
+
+        int numValuesExpected = w_size * nr_w;
+        int numValues = in.readInt();
+        if (numValues != numValuesExpected) {
+            throw new RuntimeException("num values doesn't match expected count");
+        }
+        
+        model.w = new double[numValues];
+        MyBitSet nonZeroValues = new MyBitSet();
+        nonZeroValues.read(in);
+        
+        // Could make this faster by implementing MyBitSet.nextSetBit(bit)
+        for (int i = 0; i < numValues; i++) {
+            if (nonZeroValues.get(i)) {
+                model.w[i] = in.readDouble();
+            }
+        }
+
+        return model;
+    }
+
+    /**
      * Loads the model from the file with ISO-8859-1 charset.
      * It uses {@link java.util.Locale#ENGLISH} for number formatting.
      */
@@ -450,6 +559,64 @@ public class Linear {
         }
     }
 
+    /**
+     * Writes the model to the modelOutput.
+     *
+     * <p><b>Note: The modelOutput is not closed.</b></p>
+     */
+    public static void saveModel(DataOutput out, Model model) throws IOException {
+        int nr_feature = model.nr_feature;
+        int w_size = nr_feature;
+        if (model.bias >= 0) {
+            w_size++;
+        }
+
+        int nr_w = model.nr_class;
+        if ((model.nr_class == 2) && (model.solverType != SolverType.MCSVM_CS)) {
+            nr_w = 1;
+        }
+
+        out.writeUTF(model.solverType.name());
+        out.writeInt(model.nr_class);
+        
+        if (model.label == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(model.nr_class);
+            for (int i = 0; i < model.nr_class; i++) {
+                out.writeInt(model.label[i]);
+            }
+        }
+        
+        out.writeInt(nr_feature);
+        out.writeDouble(model.bias);
+
+        int numValues = w_size * nr_w;
+        out.writeInt(numValues);
+        
+        // Store a bitset so we know which values are non-zero.
+        MyBitSet nonZeroValues = new MyBitSet(numValues);
+        for (int i = 0; i < numValues; i++) {
+            if (!isZero(model.w[i])) {
+                nonZeroValues.set(i);
+            }
+        }
+        
+        // Now we can write out the BitSet
+        nonZeroValues.write(out);
+        
+        // Could make this faster by implementing MyBitSet.nextSetBit(bit)
+        for (int i = 0; i < numValues; i++) {
+            if (nonZeroValues.get(i)) {
+                out.writeDouble(model.w[i]);
+            }
+        }
+    }
+
+    private static boolean isZero(double d) {
+        return (d > -EPSILON) && (d < +EPSILON);
+    }
+    
     /**
      * Writes the model to the file with ISO-8859-1 charset.
      * It uses {@link java.util.Locale#ENGLISH} for number formatting.
